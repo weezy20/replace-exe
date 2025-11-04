@@ -35,4 +35,31 @@ pub fn build(b: *std.Build) void {
 
     const test_step = b.step("test", "Run library tests");
     test_step.dependOn(&run_lib_tests.step);
+
+    const demo_exe = b.addExecutable(.{
+        .name = "demo",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("demo/demo.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+    demo_exe.root_module.addImport("replace-exe", lib_mod);
+    demo_exe.linkLibrary(lib);
+
+    const demo_exe2 = b.addExecutable(.{
+        .name = "demo2",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("demo/demo2.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+    demo_exe2.root_module.addImport("replace-exe", lib_mod);
+    demo_exe2.linkLibrary(lib);
+
+    if (b.option(bool, "demo", "Build demo executable") orelse false) {
+        b.installArtifact(demo_exe);
+        b.installArtifact(demo_exe2);
+    }
 }
