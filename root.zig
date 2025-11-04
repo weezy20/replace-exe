@@ -8,8 +8,8 @@ const impl = switch (builtin.os.tag) {
     else => @compileError("Unsupported operating system"),
 };
 
-pub fn selfReplace(new_exe_path: []const u8) !void {
-    return impl.selfReplace(new_exe_path);
+pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void {
+    return impl.selfReplace(allocator, new_exe_path);
 }
 
 pub fn selfDelete() !void {

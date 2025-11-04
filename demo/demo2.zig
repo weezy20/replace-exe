@@ -6,12 +6,14 @@ const replace_exe = @import("replace-exe");
 const SEMVER = "V2";
 
 pub fn main() !void {
+    const allocator = std.heap.page_allocator;
     const d = Demo{};
     var updated: bool = false;
     d.print("Before:");
     if (std.mem.eql(u8, SEMVER, "V1")) {
         std.log.info("V1: Starting update...", .{});
-        replace_exe.selfReplace("zig-out/bin/demo2") catch |err| {
+        // Here demo2 is a new exe that must replace demo1 or demo
+        replace_exe.selfReplace(allocator, "zig-out/bin/demo2") catch |err| {
             std.log.err("Failed to replace executable: {}", .{err});
             return err;
         };
