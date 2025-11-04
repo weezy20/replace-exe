@@ -45,7 +45,6 @@ pub fn build(b: *std.Build) void {
         }),
     });
     demo_exe.root_module.addImport("replace-exe", lib_mod);
-    demo_exe.linkLibrary(lib);
 
     const demo_exe2 = b.addExecutable(.{
         .name = "demo2",
@@ -56,10 +55,19 @@ pub fn build(b: *std.Build) void {
         }),
     });
     demo_exe2.root_module.addImport("replace-exe", lib_mod);
-    demo_exe2.linkLibrary(lib);
 
     if (b.option(bool, "demo", "Build demo executable") orelse false) {
         b.installArtifact(demo_exe);
         b.installArtifact(demo_exe2);
     }
+
+    const run_demo = b.addRunArtifact(demo_exe);
+    run_demo.step.dependOn(b.getInstallStep());
+
+    if (b.args) |args| {
+        run_demo.addArgs(args);
+    }
+
+    const run_step = b.step("run", "Run the demo executable");
+    run_step.dependOn(&run_demo.step);
 }
