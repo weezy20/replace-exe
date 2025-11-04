@@ -15,7 +15,7 @@ pub fn build(b: *std.Build) void {
     }
 
     // Create module for the library
-    const lib_mod = b.createModule(.{
+    const lib_mod = b.addModule("replace_exe",.{
         .root_source_file = b.path("root.zig"),
         .target = target,
         .optimize = optimize,
