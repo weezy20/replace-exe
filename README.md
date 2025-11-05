@@ -54,7 +54,7 @@ Then run the first demo exe:
 Building the library as a shared object or static library for use with C/C++:
 ```sh
 # This builds a .so shared library like libreplace-exe.so that you can link against
-zig build -Dcapi -Dshared -Doptimization=ReleaseFast
+zig build -Dcapi -Dso -Doptimization=ReleaseFast
 # Or if you prefer a static library:
 zig build -Dcapi -Doptimization=ReleaseFast
 ```

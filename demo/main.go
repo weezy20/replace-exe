@@ -4,12 +4,12 @@ package main
 #cgo CFLAGS: -I${SRCDIR}/../zig-out/include
 
 // --- Shared (.so) build ---
-// Build your Zig library with: zig build -Dcapi=true -Dshared=true
+// Build your Zig library with: zig build -Dcapi=true -Dso=true
 // Then Go will link dynamically against libreplace-exe.so
 // #cgo LDFLAGS: -L${SRCDIR}/../zig-out/lib -lreplace-exe
 
 // --- Static (.a) build ---
-// Alternatively, build Zig with: zig build -Dcapi=true -Dshared=false
+// Alternatively, build Zig with: zig build -Dcapi=true -Dso=false
 // and comment out the line above, then uncomment below to link statically
 #cgo LDFLAGS: ${SRCDIR}/../zig-out/lib/libreplace-exe.a
 
