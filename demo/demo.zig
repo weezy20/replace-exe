@@ -7,17 +7,30 @@ const SEMVER = "V1";
 
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
+    var args = std.process.args();
+    _ = args.next(); // skip exe name
+    const cmd = args.next() orelse {
+        std.log.err("Usage: demo <replace|delete> [new_executable_path]", .{});
+        std.process.exit(1);
+    };
     const d = Demo{};
     var updated: bool = false;
     d.print("Before:");
     if (std.mem.eql(u8, SEMVER, "V1")) {
-        std.log.info("V1: Starting update...", .{});
-        // Here demo2 is a new exe that must replace demo1 or demo
-        replace_exe.selfReplace(allocator, "zig-out/bin/demo2") catch |err| {
-            std.log.err("Failed to replace executable: {}", .{err});
-            return err;
-        };
-        updated = true;
+        if (std.mem.eql(u8, cmd, "replace")) {
+            // Here demo2 is a new exe that must replace demo1 or demo
+            replace_exe.selfReplace(allocator, args.next() orelse "zig-out/bin/demo2") catch |err| {
+                std.log.err("Failed to replace executable: {}", .{err});
+                return err;
+            };
+            updated = true;
+        } else if (std.mem.eql(u8, cmd, "delete")) {
+            std.log.info("V1: Deleting self...", .{});
+            try replace_exe.selfDelete();
+            std.log.info("V1: Self-delete succeeded.", .{});
+        } else {
+            return error.InvalidArguments;
+        }
     }
     if (updated) std.log.info("Update complete!", .{});
     d.print("After:");

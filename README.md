@@ -43,14 +43,11 @@ Build the demo applications with:
 zig build -Ddemo
 ```
 
-Then run the first demo:
+Then run the first demo exe:
 ```sh
-./zig-out/bin/demo
-# prints V1
-./zig-out/bin/demo
-# prints V2
+./zig-out/bin/demo delete # self-delete
+./zig-out/bin/demo replace ?</path/to/new/exe> # self-replace; default path is ./zig-out/bin/demo2
 ```
-This will replace `demo` with `demo2`. You can verify this by running `./demo` again, which will print the version number of `demo2`.
 
 ---
 ### C API

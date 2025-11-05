@@ -4,7 +4,7 @@ const std = @import("std");
 pub fn selfDelete() !void {
     var pathbuf: [std.fs.max_path_bytes]u8 = undefined;
     const exe = try std.fs.selfExePath(&pathbuf);
-    try std.fs.cwd().deleteFile(try std.fs.realpath(exe, &pathbuf));
+    try std.posix.unlink(try std.fs.realpath(exe, &pathbuf));
 }
 
 /// Replaces the currently running executable with `new_executable_path`.

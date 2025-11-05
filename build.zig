@@ -66,7 +66,6 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    demo_exe2.root_module.addImport("replace-exe", lib_mod);
 
     if (b.option(bool, "demo", "Build demo executable") orelse false) {
         b.installArtifact(demo_exe);
