@@ -3,8 +3,8 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    const capi = b.option(bool, "capi", "Build shared library: libreplace-exe.so for use with C/C++") orelse false;
     const so = b.option(bool, "shared", "Build shared library: libreplace-exe.so") orelse false;
-
     switch (target.result.os.tag) {
         .windows, .linux, .macos, .freebsd, .netbsd, .dragonfly, .openbsd => {},
         else => {
@@ -13,19 +13,31 @@ pub fn build(b: *std.Build) void {
             std.process.exit(1);
         },
     }
-
     // Create module for the library
-    const lib_mod = b.addModule("replace_exe",.{
+    const lib_mod = b.addModule("replace_exe", .{
         .root_source_file = b.path("root.zig"),
         .target = target,
         .optimize = optimize,
     });
-    const lib = b.addLibrary(.{
-        .name = "replace-exe",
-        .linkage = if (so) .dynamic else .static,
-        .root_module = lib_mod,
-    });
-    b.installArtifact(lib);
+    // C API needs to import the core module and link libc
+    if (capi) {
+        const lib = b.addLibrary(.{
+            .name = "replace-exe",
+            .linkage = if (so) .dynamic else .static,
+            .root_module = b.createModule(.{
+                .root_source_file = b.path("c_api.zig"),
+                .target = target,
+                .optimize = optimize,
+            }),
+        });
+        lib.root_module.addImport("replace_exe", lib_mod);
+        lib.linkLibC();
+
+        // Install header file for C/C++ users
+        const header = b.addInstallFile(b.path("include/replace_exe.h"), "include/replace_exe.h");
+        b.getInstallStep().dependOn(&header.step);
+        b.installArtifact(lib);
+    }
 
     // Tests
     const lib_tests = b.addTest(.{

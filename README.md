@@ -53,8 +53,28 @@ Then run the first demo:
 This will replace `demo` with `demo2`. You can verify this by running `./demo` again, which will print the version number of `demo2`.
 
 ---
-
-Building the library as a shared object:
+### C API
+Building the library as a shared object or static library for use with C/C++:
 ```sh
-zig build -Dshared -Doptimization=ReleaseFast
+# This builds a .so shared library like libreplace-exe.so that you can link against
+zig build -Dcapi -Dshared -Doptimization=ReleaseFast
+# Or if you prefer a static library:
+zig build -Dcapi -Doptimization=ReleaseFast
+```
+
+This will put the header file `replace_exe.h` and the shared or static library in the `zig-out/include` & `zig-out/lib` folders respectively.
+
+Example usage in C (using dynamic library): See [demo.c](demo/demo.c)
+
+1. Build your C app using either of the generated libraries:
+```sh
+gcc demo/demo.c -Izig-out/include -Lzig-out/lib -lreplace-exe -o test
+```
+2. Run the C demo:
+```sh
+LD_LIBRARY_PATH=zig-out/lib ./test /path/to/new/executable
+```
+3. Run again to verify replacement:
+```sh
+LD_LIBRARY_PATH=zig-out/lib ./test
 ```
