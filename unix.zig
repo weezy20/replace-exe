@@ -45,7 +45,7 @@ pub fn selfReplace(allocator: std.mem.Allocator, new_executable_path: []const u8
     std.fs.copyFileAbsolute(new_exe_abs, temp_path, .{}) catch |err| {
         return err;
     };
-    defer std.fs.deleteFileAbsolute(temp_path) catch {};
+    errdefer std.fs.deleteFileAbsolute(temp_path) catch {};
     // Apply old permissions to the new file
     const temp_file = try std.fs.openFileAbsolute(temp_path, .{});
     defer temp_file.close();
