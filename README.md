@@ -78,3 +78,13 @@ LD_LIBRARY_PATH=zig-out/lib ./test /path/to/new/executable
 ```sh
 LD_LIBRARY_PATH=zig-out/lib ./test
 ```
+
+Or if you prefer go (using `cgo`): See [demo/main.go](demo/main.go) for an example.
+1. Build your Go app linking `libreplace-exe.a` or `libreplace-exe.so`:
+```sh
+go build -o demo-go demo/main.go
+```
+2. Run the Go demo:
+```sh
+./demo-go replace /path/to/new/executable
+```
