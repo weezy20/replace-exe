@@ -1,6 +1,6 @@
 # replace-exe
 
-A smol Zig library that lets a running executable replace (or delete) itself. 
+A smol Zig library that lets a running executable replace (or delete) itself.
 
 This can be used, for instance, in applications implementing a self update feature keeping the current installation path intact.
 
@@ -50,17 +50,19 @@ Then run the first demo exe:
 ```
 
 ---
-### C API
+### FFI via C ABI
+If you're using it via FFI, the function signatures are defined in [replace_exe.h](include/replace_exe.h) and can be used in your code as the following:
+- `selfReplace` becomes `re_self_replace(const char* path)`
+- `selfDelete` becomes `re_self_delete()`
 Building the library as a shared object or static library for use with C/C++:
+
+Building:
 ```sh
 # This builds a .so shared library like libreplace-exe.so that you can link against
 zig build -Dcapi -Dso -Doptimization=ReleaseFast
 # Or if you prefer a static library:
 zig build -Dcapi -Doptimization=ReleaseFast
 ```
-
-This will put the header file `replace_exe.h` and the shared or static library in the `zig-out/include` & `zig-out/lib` folders respectively.
-
 Example usage in C (using dynamic library): See [demo.c](demo/demo.c)
 
 1. Build your C app using either of the generated libraries:
