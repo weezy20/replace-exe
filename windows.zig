@@ -5,3 +5,7 @@ pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void
     _ = new_exe_path;
     return;
 }
+
+pub fn selfDelete() !void {
+    return;
+}

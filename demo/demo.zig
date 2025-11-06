@@ -7,7 +7,8 @@ const SEMVER = "V1";
 
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
-    var args = std.process.args();
+    var args = try std.process.ArgIterator.initWithAllocator(allocator);
+    defer args.deinit();
     _ = args.next(); // skip exe name
     const cmd = args.next() orelse {
         std.log.err("Usage: demo <replace|delete> [new_executable_path]", .{});
