@@ -27,7 +27,7 @@ pub fn main() !void {
             updated = true;
         } else if (std.mem.eql(u8, cmd, "delete")) {
             std.log.info("V1: Deleting self...", .{});
-            try replace_exe.selfDelete();
+            try replace_exe.selfDelete(null);
             std.log.info("V1: Self-delete succeeded.", .{});
         } else {
             return error.InvalidArguments;

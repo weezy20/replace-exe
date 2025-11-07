@@ -19,7 +19,7 @@ pub fn selfReplace(allocator: std.mem.Allocator, new_exe: []const u8) !void {
 
     // On some systems, selfExePath might return a path that no longer exists
     // if the executable was already moved/deleted (though the inode is still accessible)
-    const stat = try std.posix.stat(current_exe);
+    const stat = try std.fs.cwd().statFile(current_exe);
     const old_mode = stat.mode;
 
     const parent_dir_path = try std.fs.selfExeDirPathAlloc(allocator);
