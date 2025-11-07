@@ -1,7 +1,7 @@
 const std = @import("std");
 
 /// Deletes the currently running executable (allowed on Unix/Linux).
-pub fn selfDelete() !void {
+pub fn selfDelete(_: ?std.mem.Allocator) !void {
     var pathbuf: [std.fs.max_path_bytes]u8 = undefined;
     const exe = try std.fs.selfExePath(&pathbuf);
     try std.posix.unlink(try std.fs.realpath(exe, &pathbuf));

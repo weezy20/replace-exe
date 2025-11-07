@@ -14,6 +14,8 @@ pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void
 }
 /// Deletes the current executable. On unix this is immediate, but on windows it's deferred unitl current process exits.
 /// Can be used as a self-uninstall mechanism. Do not follow this function with a selfReplace call as that will surely fail.
-pub fn selfDelete() !void {
-    return impl.selfDelete();
+/// On unix/linux you can safely pass a null allocator as it's not needed but provided for API consistency with windows which does require
+/// an allocator. If no allocator is provided as on FFI, then an arena allocator will be used.
+pub fn selfDelete(allocator: ?std.mem.Allocator) !void {
+    return impl.selfDelete(allocator);
 }
