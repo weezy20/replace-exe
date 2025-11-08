@@ -65,9 +65,6 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    if (native_os == .windows) {
-        demo_exe.root_module.link_libc = true;
-    }
 
     if (c_lib) |lib| {
         const demo_c = b.addExecutable(.{ .name = "demo-c", .root_module = b.createModule(.{

@@ -3,6 +3,7 @@ const SELFDELETE_SUFFIX: []const u8 = ".__selfdelete__.exe";
 const TEMP_SUFFIX: []const u8 = ".__temp__.exe";
 
 pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void {
+    //TODO: implement
     _ = allocator;
     _ = new_exe_path;
     return;
@@ -16,10 +17,8 @@ pub fn selfDeleteExcludingPath(allocator: ?std.mem.Allocator, exclude_path: []co
 }
 
 pub fn selfDelete(allocator: ?std.mem.Allocator) !void {
-    const _allocator = if (allocator) |a| a else alloc: {
-        var arena = std.heap.ArenaAllocator.init(std.heap.c_allocator);
-        defer arena.deinit();
-        break :alloc arena.allocator();
+    const _allocator = if (allocator) |a| a else {
+        return error.NoAllocator;
     };
     var pathbuf: [std.fs.max_path_bytes]u8 = undefined;
     const current_exe = try std.fs.selfExePath(&pathbuf);

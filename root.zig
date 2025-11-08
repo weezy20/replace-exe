@@ -9,13 +9,16 @@ const impl = switch (builtin.os.tag) {
 };
 /// Replaces the current executable with a file provided at `new_exe_path`.
 /// Can be used to update to a newer version of a running executable or something else entirely.
+/// Requires an allocator on all platforms to perform temporary file operations.
+/// For C FFI boundaries, a c_allocator will be chosen as default.
 pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void {
     return impl.selfReplace(allocator, new_exe_path);
 }
 /// Deletes the current executable. On unix this is immediate, but on windows it's deferred unitl current process exits.
 /// Can be used as a self-uninstall mechanism. Do not follow this function with a selfReplace call as that will surely fail.
 /// On unix/linux you can safely pass a null allocator as it's not needed but provided for API consistency with windows which does require
-/// an allocator. If no allocator is provided as on FFI, then an arena allocator will be used.
+/// an allocator. If no allocator is provided, then if it's used on windows will error.NoAllocator.
+/// For C FFI boundaries, a c_allocator will be chosen as default.
 pub fn selfDelete(allocator: ?std.mem.Allocator) !void {
     return impl.selfDelete(allocator);
 }
@@ -25,6 +28,8 @@ pub fn selfDelete(allocator: ?std.mem.Allocator) !void {
 /// not place temporary files in the given path (or any subdirectory of) for the duration
 /// of the deletion operation.  This is necessary to demolish folder more complex folder
 /// structures on Windows.
+///
+/// Windows requires an allocator but unix/linux does not.
 pub fn selfDeleteExcludingPath(allocator: ?std.mem.Allocator, exclude_path: []const u8) !void {
     return impl.selfDeleteExcludingPath(allocator, exclude_path);
 }
