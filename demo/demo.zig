@@ -6,6 +6,7 @@ const replace_exe = @import("replace-exe");
 const SEMVER = "V1";
 
 pub fn main() !void {
+    const native_os = @import("builtin").os.tag;
     const allocator = std.heap.page_allocator;
     var args = try std.process.ArgIterator.initWithAllocator(allocator);
     defer args.deinit();
@@ -27,7 +28,10 @@ pub fn main() !void {
             updated = true;
         } else if (std.mem.eql(u8, cmd, "delete")) {
             std.log.info("V1: Deleting self...", .{});
-            try replace_exe.selfDelete(null);
+            try replace_exe.selfDelete(switch (native_os) {
+                .windows => allocator,
+                else => null,
+            });
             std.log.info("V1: Self-delete succeeded.", .{});
         } else {
             return error.InvalidArguments;

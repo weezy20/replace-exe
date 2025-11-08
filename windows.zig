@@ -22,7 +22,13 @@ pub fn selfDelete(allocator: ?std.mem.Allocator) !void {
     };
     var pathbuf: [std.fs.max_path_bytes]u8 = undefined;
     const current_exe = try std.fs.selfExePath(&pathbuf);
-    const temp_exe = try std.fs.realpathAlloc(_allocator, try std.fs.path.join(_allocator, &[_][]const u8{ current_exe, SELFDELETE_SUFFIX }));
-    defer _allocator.free(temp_exe);
+    const exe_basename = try std.fs.path.basenameWindows(current_exe);
+    const temp_exe_name = try std.fmt.allocPrint(_allocator, "{s}{d}{s}", .{ exe_basename, std.time.timestamp(), SELFDELETE_SUFFIX });
+    defer _allocator.free(temp_exe_name);
+    const temp_exe = try std.fs.realpathAlloc(
+        _allocator,
+    );
+    // defer _allocator.free(temp_exe);
+    std.debug.print("temp basename : {s}", .{temp_exe_name});
     return;
 }
