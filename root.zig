@@ -19,3 +19,12 @@ pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void
 pub fn selfDelete(allocator: ?std.mem.Allocator) !void {
     return impl.selfDelete(allocator);
 }
+
+/// Like `selfDelete` but accepts a path that is not used for temporary file operations.
+/// This is equivalent to [`self_delete`] on Unix, but it instructs the deletion logic to
+/// not place temporary files in the given path (or any subdirectory of) for the duration
+/// of the deletion operation.  This is necessary to demolish folder more complex folder
+/// structures on Windows.
+pub fn selfDeleteExcludingPath(allocator: ?std.mem.Allocator, exclude_path: []const u8) !void {
+    return impl.selfDeleteExcludingPath(allocator, exclude_path);
+}

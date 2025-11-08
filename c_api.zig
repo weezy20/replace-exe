@@ -22,3 +22,18 @@ export fn re_self_replace(new_exe_path: [*c]const u8) c_int {
     };
     return 0;
 }
+
+export fn re_self_delete_excluding_path(exclude_path: [*c]const u8) c_int {
+    const native_os = @import("builtin").os.tag;
+
+    // Convert C string to Zig slice (null-terminated expected)
+    const path = std.mem.sliceTo(exclude_path, 0);
+
+    re.selfDeleteExcludingPath(switch (native_os) {
+        .windows => std.heap.c_allocator,
+        else => null,
+    }, path) catch {
+        return -1;
+    };
+    return 0;
+}

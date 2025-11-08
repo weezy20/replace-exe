@@ -7,6 +7,11 @@ pub fn selfDelete(_: ?std.mem.Allocator) !void {
     try std.posix.unlink(try std.fs.realpath(exe, &pathbuf));
 }
 
+pub fn selfDeleteExcludingPath(_: ?std.mem.Allocator, exclude_path: []const u8) !void {
+    _ = exclude_path;
+    return selfDelete(null);
+}
+
 /// Replaces the currently running executable with `new_executable_path`.
 /// Creates a temporary file next to the running executable, copies the new
 /// binary into it, preserves permissions, and atomically renames it.
