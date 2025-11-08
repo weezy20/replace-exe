@@ -23,6 +23,7 @@ export fn re_self_replace(new_exe_path: [*c]const u8) c_int {
     return 0;
 }
 
+// Export a C-callable version of selfDeleteExcludingPath
 export fn re_self_delete_excluding_path(exclude_path: [*c]const u8) c_int {
     const native_os = @import("builtin").os.tag;
 
