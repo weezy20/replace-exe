@@ -6,6 +6,8 @@ const replace_exe = @import("replace-exe");
 const SEMVER = "V1";
 
 pub fn main() !void {
+    replace_exe.registerHooks(); // Must be first on Windows
+
     const native_os = @import("builtin").os.tag;
     const allocator = std.heap.page_allocator;
     var args = try std.process.ArgIterator.initWithAllocator(allocator);
