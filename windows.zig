@@ -10,17 +10,19 @@ pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void
 }
 
 pub fn selfDeleteExcludingPath(allocator: ?std.mem.Allocator, exclude_path: []const u8) !void {
-    const _allocator = if (allocator) |a| a else {
+    if (allocator) |a| {
+        return schedule_self_deletion_on_shutdown(a, exclude_path);
+    } else {
         return error.NoAllocator;
-    };
-    return schedule_self_deletion_on_shutdown(_allocator, exclude_path);
+    }
 }
 
 pub fn selfDelete(allocator: ?std.mem.Allocator) !void {
-    const _allocator = if (allocator) |a| a else {
+    if (allocator) |a| {
+        return schedule_self_deletion_on_shutdown(a, null);
+    } else {
         return error.NoAllocator;
-    };
-    return schedule_self_deletion_on_shutdown(_allocator, null);
+    }
 }
 
 fn schedule_self_deletion_on_shutdown(allocator: std.mem.Allocator, exclude_path: ?[]const u8) !void {
