@@ -54,7 +54,7 @@ pub fn selfDeleteExcludingPath(allocator: ?std.mem.Allocator, exclude_path: []co
 ///     try re.selfDelete(allocator);
 /// }
 /// ```
-pub fn registerHooks() void {
+pub fn registerHooks(allocator: ?std.mem.Allocator) void {
     if (builtin.os.tag != .windows) return;
-    impl.selfDeleteInit();
+    impl.selfDeleteInit(allocator);
 }

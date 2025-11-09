@@ -42,7 +42,7 @@ export fn self_delete_excluding_path(exclude_path: [*c]const u8) c_int {
 /// Windows only, is a no-op on linux/unix
 export fn register_hooks() c_int {
     switch (native_os) {
-        .windows => re.registerHooks(),
+        .windows => re.registerHooks(std.heap.c_allocator),
         else => {},
     }
     return 0;
