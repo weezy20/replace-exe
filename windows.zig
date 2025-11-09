@@ -1,6 +1,7 @@
 const std = @import("std");
 const SELFDELETE_SUFFIX: []const u8 = ".__selfdelete__.exe";
 const TEMP_SUFFIX: []const u8 = ".__temp__.exe";
+const RELOCATED_SUFFIX: []const u8 = ".__relocated__.exe";
 
 pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void {
     //TODO: implement
@@ -27,33 +28,61 @@ pub fn selfDelete(allocator: ?std.mem.Allocator) !void {
 
 fn schedule_self_deletion_on_shutdown(allocator: std.mem.Allocator, exclude_path: ?[]const u8) !void {
     var pathbuf: [std.fs.max_path_bytes]u8 = undefined;
+    // Path to current-exe absolute
     const current_exe = try std.fs.selfExePath(&pathbuf);
+    // Path to windows temp dir
+    const windows_temp_dir = std.process.getEnvVarOwned(allocator, "TEMP") catch
+        std.process.getEnvVarOwned(allocator, "TMP") catch null;
+    defer if (windows_temp_dir) |dir| allocator.free(dir);
 
+    // Strategy 1: Use %TEMP% for relocated & self-delete helper
+    if (windows_temp_dir) |tmp| {
+        const relocated_exe = try getTmpExePath(allocator, current_exe, tmp, RELOCATED_SUFFIX);
+        defer allocator.free(relocated_exe);
+
+        // Try to rename current exe to temp dir
+        if (std.fs.renameAbsolute(current_exe, relocated_exe)) {
+            // Success! Now create delete helper and spawn
+            const tmp_exe = try getTmpExePath(allocator, current_exe, tmp, SELFDELETE_SUFFIX);
+            defer allocator.free(tmp_exe);
+
+            try std.fs.copyFileAbsolute(relocated_exe, tmp_exe, .{});
+            try spawnTmpExeToDeleteParent(allocator, tmp_exe, relocated_exe);
+            return;
+        } else |_| {
+            // Rename failed, fall through to next strategy
+        }
+    }
+    // Strategy 2: Use exclude_path parent if provided
+    if (exclude_path) |path| {
+        const parent = std.fs.path.dirname(path) orelse return error.NoParentForExcludePath;
+
+        const tmp_exe = try getTmpExePath(allocator, current_exe, parent, SELFDELETE_SUFFIX);
+        defer allocator.free(tmp_exe);
+
+        const relocated_exe = try getTmpExePath(allocator, current_exe, parent, RELOCATED_SUFFIX);
+        defer allocator.free(relocated_exe);
+
+        try std.fs.copyFileAbsolute(current_exe, tmp_exe, .{});
+        try std.fs.renameAbsolute(current_exe, relocated_exe);
+        try spawnTmpExeToDeleteParent(allocator, tmp_exe, relocated_exe);
+        return;
+    }
+
+    // Parent dir for current exe
     const exe_base_dir = try std.fs.selfExeDirPathAlloc(allocator);
     defer allocator.free(exe_base_dir);
 
-    const base_dir = if (exclude_path) |path| blk: {
-        // Try to get parent directory of exclude_path
-        if (std.fs.path.dirname(path)) |parent| {
-            break :blk try allocator.dupe(u8, parent);
-        } else {
-            // If no parent, fall back to exe_base_dir (no allocation needed)
-            break :blk exe_base_dir;
-        }
-    } else exe_base_dir;
+    const tmp_exe = try getTmpExePath(allocator, current_exe, exe_base_dir, SELFDELETE_SUFFIX);
+    defer allocator.free(tmp_exe);
 
-    // Only free base_dir if it's not the same as exe_base_dir
-    defer if (base_dir.ptr != exe_base_dir.ptr) allocator.free(base_dir);
-
-    const temp_exe = try getTempExecutable(allocator, current_exe, base_dir, SELFDELETE_SUFFIX);
-    defer allocator.free(temp_exe);
-    // defer allocator.free(temp_exe);
-    std.debug.print("temp exe : {s}", .{temp_exe});
+    try std.fs.copyFileAbsolute(current_exe, tmp_exe, .{});
+    try spawnTmpExeToDeleteParent(allocator, tmp_exe, current_exe);
 }
 
-/// Creates a temporary executable with a random name in the given directory and
+/// Creates a temporary executable path with a random name in the given directory and
 /// the provided suffix. Returns path/to/temp_exe. Caller owns the memory.
-fn getTempExecutable(
+fn getTmpExePath(
     allocator: std.mem.Allocator,
     /// Path to current exe
     current_exe: []const u8,
@@ -66,23 +95,31 @@ fn getTempExecutable(
     var temp_name = try std.ArrayList(u8).initCapacity(allocator, base_dir.len + 32 + 2 + basename.len + suffix.len);
     defer temp_name.deinit(allocator);
 
-    var rng = std.Random.DefaultPrng.init(@as(u64, @bitCast(std.time.nanoTimestamp())));
+    var rng = std.Random.DefaultPrng.init(@as(u64, @bitCast(std.time.timestamp())));
     const random = rng.random();
 
-    try temp_name.append('.');
+    try temp_name.append(allocator, '.');
 
     const stem = std.fs.path.stem(basename);
-    try temp_name.appendSlice(stem);
-    try temp_name.append('.');
+    try temp_name.appendSlice(allocator, stem);
+    try temp_name.append(allocator, '.');
 
     // Generate 32 random lowercase letters
     const lowercase = "abcdefghijklmnopqrstuvwxyz";
     for (0..32) |_| {
         const idx = random.intRangeAtMost(usize, 0, lowercase.len - 1);
-        try temp_name.append(lowercase[idx]);
+        try temp_name.append(allocator, lowercase[idx]);
     }
 
-    try temp_name.appendSlice(suffix);
+    try temp_name.appendSlice(allocator, suffix);
 
     return std.fs.path.join(allocator, &.{ base_dir, temp_name.items });
+}
+
+fn spawnTmpExeToDeleteParent(allocator: std.mem.Allocator, tmp_exe: []const u8, relocated_exe: []const u8) !void {
+    //TODO: impl
+    _ = allocator;
+    _ = tmp_exe;
+    _ = relocated_exe;
+    return;
 }
