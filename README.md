@@ -52,8 +52,8 @@ Then run the first demo exe:
 ---
 ### FFI via C ABI
 If you're using it via FFI, the function signatures are defined in [replace_exe.h](include/replace_exe.h) and can be used in your code as the following:
-- `selfReplace` becomes `re_self_replace(const char* path)`
-- `selfDelete` becomes `re_self_delete()`
+- `selfReplace` becomes `self_replace(const char* path)`
+- `selfDelete` becomes `self_delete()`
 Building the library as a shared object or static library for use with C/C++:
 
 Building:

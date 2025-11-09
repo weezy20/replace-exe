@@ -25,6 +25,7 @@ import (
 )
 
 func main() {
+	C.register_hooks()
 	if len(os.Args) < 2 {
 		fmt.Println("Usage:")
 		fmt.Println("  ./demo-go delete             # test self delete")
@@ -36,10 +37,10 @@ func main() {
 
 	switch cmd {
 	case "delete":
-		fmt.Println("[Go] Calling re_self_delete() ...")
-		res := C.re_self_delete()
+		fmt.Println("[Go] Calling self_delete() ...")
+		res := C.self_delete()
 		if res != 0 {
-			fmt.Println("[Go] re_self_delete failed!")
+			fmt.Println("[Go] self_delete failed!")
 		} else {
 			fmt.Println("[Go] Success — process may delete itself 😅")
 		}
@@ -52,10 +53,10 @@ func main() {
 		path := C.CString(os.Args[2])
 		defer C.free(unsafe.Pointer(path))
 
-		fmt.Printf("[Go] Calling re_self_replace(%q) ...\n", os.Args[2])
-		res := C.re_self_replace(path)
+		fmt.Printf("[Go] Calling self_replace(%q) ...\n", os.Args[2])
+		res := C.self_replace(path)
 		if res != 0 {
-			fmt.Println("[Go] re_self_replace failed!")
+			fmt.Println("[Go] self_replace failed!")
 		} else {
 			fmt.Println("[Go] Replacement succeeded!")
 		}

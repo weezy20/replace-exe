@@ -1,7 +1,10 @@
 const std = @import("std");
+const windows = std.os.windows;
 const SELFDELETE_SUFFIX: []const u8 = ".__selfdelete__.exe";
 const TEMP_SUFFIX: []const u8 = ".__temp__.exe";
 const RELOCATED_SUFFIX: []const u8 = ".__relocated__.exe";
+
+pub fn selfDeleteInit() void {}
 
 pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void {
     //TODO: implement
@@ -116,10 +119,35 @@ fn getTmpExePath(
     return std.fs.path.join(allocator, &.{ base_dir, temp_name.items });
 }
 
-fn spawnTmpExeToDeleteParent(allocator: std.mem.Allocator, tmp_exe: []const u8, relocated_exe: []const u8) !void {
-    //TODO: impl
-    _ = allocator;
-    _ = tmp_exe;
-    _ = relocated_exe;
-    return;
+// const GENERIC_READ: windows.DWORD = 0x80000000;
+// const FILE_SHARE_READ: windows.DWORD = 0x00000001;
+// const FILE_SHARE_DELETE: windows.DWORD = 0x00000004;
+// const OPEN_EXISTING: windows.DWORD = 3;
+// const FILE_FLAG_DELETE_ON_CLOSE: windows.DWORD = 0x04000000;
+// const DUPLICATE_SAME_ACCESS: windows.DWORD = 0x00000002;
+
+// const SECURITY_ATTRIBUTES = extern struct {
+//     nLength: windows.DWORD,
+//     lpSecurityDescriptor: ?*anyopaque,
+//     bInheritHandle: windows.BOOL,
+// };
+
+// extern "kernel32" fn DuplicateHandle(
+//     hSourceProcessHandle: windows.HANDLE,
+//     hSourceHandle: windows.HANDLE,
+//     hTargetProcessHandle: windows.HANDLE,
+//     lpTargetHandle: *windows.HANDLE,
+//     dwDesiredAccess: windows.DWORD,
+//     bInheritHandle: windows.BOOL,
+//     dwOptions: windows.DWORD,
+// ) callconv(windows.WINAPI) windows.BOOL;
+
+/// Spawns the temporary exe and instructs it to delete the parent exe.
+/// The child will wait until the parent process exits, then delete the target file.
+fn spawnTmpExeToDeleteParent(
+    allocator: std.mem.Allocator,
+    tmp_exe: []const u8,
+    original_exe: []const u8,
+) !void {
+    _ = .{ allocator, tmp_exe, original_exe };
 }

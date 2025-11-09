@@ -9,14 +9,14 @@ extern "C" {
  * Deletes the currently running executable.
  * @return 0 on success, -1 on failure
  */
-int re_self_delete(void);
+int self_delete(void);
 
 /**
  * Replaces the currently running executable with a new one.
  * @param new_exe_path Path to the new executable (null-terminated)
  * @return 0 on success, -1 on failure
  */
-int re_self_replace(const char* new_exe_path);
+int self_replace(const char* new_exe_path);
 
 #ifdef __cplusplus
 }

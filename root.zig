@@ -33,3 +33,28 @@ pub fn selfDelete(allocator: ?std.mem.Allocator) !void {
 pub fn selfDeleteExcludingPath(allocator: ?std.mem.Allocator, exclude_path: []const u8) !void {
     return impl.selfDeleteExcludingPath(allocator, exclude_path);
 }
+
+/// Call this at the very start of main() on Windows to enable self-deletion hooks.
+/// REQUIRED on Windows - selfDelete() and selfReplace() will return error.HooksNotRegistered if not called.
+/// Is a no-op on non-Windows platforms.
+///
+/// This checks if the current process is a deletion helper and handles cleanup accordingly.
+/// If it is a helper process, this function will not return (process exits after cleanup).
+///
+/// Example usage:
+/// ```zig
+/// pub fn main() !void {
+///     const re = @import("replace-exe");
+///     re.registerHooks(); // Must be first line on Windows
+///
+///     // Your normal program logic
+///     // ...
+///
+///     // Later, when you want to self-delete:
+///     try re.selfDelete(allocator);
+/// }
+/// ```
+pub fn registerHooks() void {
+    if (builtin.os.tag != .windows) return;
+    impl.selfDeleteInit();
+}

@@ -12,16 +12,16 @@ int main(int argc, char **argv) {
 
     printf("[C] Trying to replace current executable with: %s\n", path);
 
-    int res = re_self_replace(path);
+    int res = self_replace(path);
     if (res != 0) {
-        printf("[C] re_self_replace failed!\n");
+        printf("[C] self_replace failed!\n");
         return 1;
     }
 
     printf("[C] Replacement succeeded.\n");
 
     // Or test deletion instead:
-    // int res = re_self_delete();
+    // int res = self_delete();
 
     return 0;
 }
