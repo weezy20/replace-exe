@@ -6,7 +6,8 @@ pub fn build(b: *std.Build) void {
     const capi = b.option(bool, "capi", "Build libreplace-exe for use with C/C++") orelse false;
     const so = b.option(bool, "so", "Build shared library: libreplace-exe.so instead of default static lib") orelse false;
     const demo = b.option(bool, "demo", "Build & Install demo executables") orelse false;
-    switch (target.result.os.tag) {
+    const native_os = target.result.os.tag;
+    switch (native_os) {
         .windows, .linux, .macos, .freebsd, .netbsd, .dragonfly, .openbsd => {},
         else => {
             std.log.err("Unsupported Target OS: {s}", .{@tagName(target.result.os.tag)});
@@ -31,7 +32,7 @@ pub fn build(b: *std.Build) void {
             }),
         });
         lib.root_module.addImport("replace_exe", lib_mod);
-        lib.linkLibC();
+        lib.root_module.link_libc = true;
         lib.use_llvm = true; // Needed due to bug in debug ELF linker for linux : https://github.com/ziglang/zig/issues/25129
         c_lib = lib;
         const header = b.addInstallFile(b.path("include/replace_exe.h"), "include/replace_exe.h");

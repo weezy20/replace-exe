@@ -6,8 +6,12 @@ const replace_exe = @import("replace-exe");
 const SEMVER = "V1";
 
 pub fn main() !void {
+    const native_os = @import("builtin").os.tag;
     const allocator = std.heap.page_allocator;
-    var args = std.process.args();
+    // Register hook for process to do self_delete/replace detection
+    replace_exe.init(allocator); // Must be called as soon as possible on Windows - If Allocator is not provided, ArenaAllocator(std.heap.page_allocator) is used
+    var args = try std.process.ArgIterator.initWithAllocator(allocator);
+    defer args.deinit();
     _ = args.next(); // skip exe name
     const cmd = args.next() orelse {
         std.log.err("Usage: demo <replace|delete> [new_executable_path]", .{});
@@ -26,7 +30,10 @@ pub fn main() !void {
             updated = true;
         } else if (std.mem.eql(u8, cmd, "delete")) {
             std.log.info("V1: Deleting self...", .{});
-            try replace_exe.selfDelete();
+            try replace_exe.selfDelete(switch (native_os) {
+                .windows => allocator,
+                else => null,
+            });
             std.log.info("V1: Self-delete succeeded.", .{});
         } else {
             return error.InvalidArguments;
