@@ -39,7 +39,11 @@ try re.selfReplace(allocator, "path/to/new/executable");
 try re.selfDelete();
 ```
 
-If you're deleting the parent folder itself of the current exe then you might not want to use `selfDelete` directly but instead provide the current parent dir (or really any dir that you want to prevent from keeping temporary exes) using `selfDeleteExcludingPath(path: []const u8)` where the function ensures that no temporary exes are put into that path, thereby preventing its deletion for the lifetime of the current running executable.
+
+Note: On windows, if you're deleting the parent folder itself of the current exe itself then you might not want to use `selfDelete` directly but instead provide the current parent dir (or really any dir that you want to prevent from being locked) using `selfDeleteExcludingPath(path: []const u8)` where the function ensures that no temporary exes are put into that path, thereby preventing its deletion for the lifetime of the current running executable.
+
+The current strategy is to place temporary exes in `%TMP%` or `%TEMP%` & if that fails due to cross filesystem paths (exe & temp dir being on different filesystems) we fallback to storing the temp exe helpers in current parent of running exe unless `selfDeleteExcludingPath(p)` is provided in which case, the parent of `p` would be selected & as a fallback, we would go back to using the same parent dir of current-exe.
+
 ---
 
 ### Demo
