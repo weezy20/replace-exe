@@ -46,13 +46,22 @@ Some example code is provided in the [demo](demo) folder:
 
 Build the demo applications with:
 ```sh
+# Build zig demo exes:
 zig build -Ddemo
+# Build the demo-c executable alongside the above:
+zig build -Ddemo -Dcapi
 ```
 
 Then run the first demo exe:
 ```sh
 ./zig-out/bin/demo delete # self-delete
 ./zig-out/bin/demo replace ?</path/to/new/exe> # self-replace; default path is ./zig-out/bin/demo2
+```
+
+Try out the `demo-c` exe which calls libreplace-exe from C:
+```sh
+./zig-out/bin/demo-c delete
+# verify demo-c is deleted
 ```
 
 ---
