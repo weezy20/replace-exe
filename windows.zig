@@ -10,6 +10,7 @@ var hooks_registered: bool = false;
 /// Must be called at the start of main() on Windows via `init()`
 /// Checks if this process is a self-delete helper and handles cleanup if so.
 pub fn selfDeleteInit(allocator: ?std.mem.Allocator) void {
+    if (hooks_registered) return;
     hooks_registered = true;
 
     var path_buf: [std.fs.max_path_bytes]u8 = undefined;
@@ -25,9 +26,31 @@ pub fn selfDeleteInit(allocator: ?std.mem.Allocator) void {
 }
 
 pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void {
-    //TODO: implement
-    _ = allocator;
-    _ = new_exe_path;
+    // Abs path to new exe
+    const new_exe_path_abs = try std.fs.realpathAlloc(allocator, new_exe_path);
+    defer allocator.free(new_exe_path_abs);
+
+    // Path to current-exe absolute
+    var pathbuf: [std.fs.max_path_bytes]u8 = undefined;
+    const current_exe = try std.fs.selfExePath(&pathbuf);
+
+    // Abs path to parent dir for temp/relocated exes
+    const parent_dir = try std.fs.selfExeDirPathAlloc(allocator);
+    defer allocator.free(parent_dir);
+
+    // Free up original name by relocation rename current -> current.relocated
+    const old_exe = try getTmpExePath(allocator, current_exe, parent_dir, RELOCATED_SUFFIX);
+    defer allocator.free(old_exe);
+    try std.fs.renameAbsolute(current_exe, old_exe);
+
+    // Schedule relocated exe for deletion on shutdown
+    try schedule_self_deletion_on_shutdown(allocator, old_exe, null);
+
+    const temp_exe = try getTmpExePath(allocator, current_exe, parent_dir, TEMP_SUFFIX);
+    defer allocator.free(temp_exe);
+    try std.fs.copyFileAbsolute(new_exe_path_abs, temp_exe, .{});
+    errdefer std.fs.deleteFileAbsolute(temp_exe);
+    try std.fs.renameAbsolute(temp_exe, current_exe);
     return;
 }
 
@@ -35,7 +58,10 @@ pub fn selfDeleteExcludingPath(allocator: ?std.mem.Allocator, exclude_path: []co
     if (!hooks_registered) return error.HooksNotRegistered;
 
     if (allocator) |a| {
-        return schedule_self_deletion_on_shutdown(a, exclude_path);
+        var pathbuf: [std.fs.max_path_bytes]u8 = undefined;
+        // Path to current-exe absolute
+        const current_exe = try std.fs.selfExePath(&pathbuf);
+        return schedule_self_deletion_on_shutdown(a, current_exe, exclude_path);
     } else {
         return error.NoAllocator;
     }
@@ -45,17 +71,16 @@ pub fn selfDelete(allocator: ?std.mem.Allocator) !void {
     if (!hooks_registered) return error.HooksNotRegistered;
 
     if (allocator) |a| {
-        return schedule_self_deletion_on_shutdown(a, null);
+        var pathbuf: [std.fs.max_path_bytes]u8 = undefined;
+        // Path to current-exe absolute
+        const current_exe = try std.fs.selfExePath(&pathbuf);
+        return schedule_self_deletion_on_shutdown(a, current_exe, null);
     } else {
         return error.NoAllocator;
     }
 }
 
-fn schedule_self_deletion_on_shutdown(allocator: std.mem.Allocator, exclude_path: ?[]const u8) !void {
-    var pathbuf: [std.fs.max_path_bytes]u8 = undefined;
-    // Path to current-exe absolute
-    const current_exe = try std.fs.selfExePath(&pathbuf);
-
+fn schedule_self_deletion_on_shutdown(allocator: std.mem.Allocator, current_exe: []const u8, exclude_path: ?[]const u8) !void {
     // Strategy 1: Try %TEMP% if it's on the same drive as the executable
     const windows_temp_dir = std.process.getEnvVarOwned(allocator, "TEMP") catch
         std.process.getEnvVarOwned(allocator, "TMP") catch null;
@@ -119,8 +144,7 @@ fn schedule_self_deletion_on_shutdown(allocator: std.mem.Allocator, exclude_path
     }
 
     // Strategy 3: Use exe's own directory (fallback, always same drive)
-    const exe_base_dir = try std.fs.selfExeDirPathAlloc(allocator);
-    defer allocator.free(exe_base_dir);
+    const exe_base_dir = std.fs.path.dirname(current_exe) orelse error.UnexpectedNoParentDir;
 
     const relocated_exe = try getTmpExePath(allocator, current_exe, exe_base_dir, RELOCATED_SUFFIX);
     defer allocator.free(relocated_exe);
