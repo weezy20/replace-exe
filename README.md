@@ -28,9 +28,9 @@ exe.root_module.addImport("replace_exe", libreplace_exe.module("replace_exe"));
 ```zig
 // step 1: import
 const re = @import("replace_exe");
-// step 2: register hook as soon as possible in main(). This is a no-op on non-windows:
+// step 2: register hook as soon as possible in main(). This is a no-op on non-windows OS:
 pub fn main() !void {
-    re.registerHooks(allocator); // or re.registerHooks(null) if you want to go with the default ArenaAllocator(std.heap.page_allocator) for `selfDeleteInit()` operations
+    re.init(allocator); // or re.init(null) if you want to go with the default ArenaAllocator(std.heap.page_allocator) for `selfDeleteInit()` operations
     // your logic here..
 }
 // Replace current executable with a new one
@@ -60,7 +60,7 @@ Then run the first demo exe:
 If you're using it via FFI, the function signatures are defined in [replace_exe.h](include/replace_exe.h) and can be used in your code as the following:
 - `selfReplace` becomes `self_replace(const char* path)`
 - `selfDelete` becomes `self_delete()`
-- `registerHooks(?std.mem.Allocator)` becomes `register_hooks()`
+- `init(?std.mem.Allocator)` becomes `init()`
 
 See [c_api.zig](c_api.zig) for definitions. 
 Building the library as a shared object or static library for use with C/C++:

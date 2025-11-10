@@ -9,7 +9,7 @@ pub fn main() !void {
     const native_os = @import("builtin").os.tag;
     const allocator = std.heap.page_allocator;
     // Register hook for process to do self_delete/replace detection
-    replace_exe.registerHooks(allocator); // Must be called as soon as possible on Windows - If Allocator is not provided, ArenaAllocator(std.heap.page_allocator) is used
+    replace_exe.init(allocator); // Must be called as soon as possible on Windows - If Allocator is not provided, ArenaAllocator(std.heap.page_allocator) is used
     var args = try std.process.ArgIterator.initWithAllocator(allocator);
     defer args.deinit();
     _ = args.next(); // skip exe name

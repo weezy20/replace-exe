@@ -10,7 +10,7 @@ extern "C" {
  * Must be called at the start of main() before any other replace_exe functions.
  * @return 0 on success, -1 on failure
  */
-int register_hooks(void);
+int init(void);
 
 /**
  * Deletes the currently running executable.

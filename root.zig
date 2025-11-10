@@ -45,7 +45,7 @@ pub fn selfDeleteExcludingPath(allocator: ?std.mem.Allocator, exclude_path: []co
 /// ```zig
 /// pub fn main() !void {
 ///     const re = @import("replace-exe");
-///     re.registerHooks(); // Must be first line on Windows
+///     re.init(); // Must be first line on Windows
 ///
 ///     // Your normal program logic
 ///     // ...
@@ -54,7 +54,7 @@ pub fn selfDeleteExcludingPath(allocator: ?std.mem.Allocator, exclude_path: []co
 ///     try re.selfDelete(allocator);
 /// }
 /// ```
-pub fn registerHooks(allocator: ?std.mem.Allocator) void {
+pub fn init(allocator: ?std.mem.Allocator) void {
     if (builtin.os.tag != .windows) return;
     impl.selfDeleteInit(allocator);
 }

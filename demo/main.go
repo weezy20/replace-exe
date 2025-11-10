@@ -25,7 +25,7 @@ import (
 )
 
 func main() {
-	C.register_hooks()
+	C.init()
 	if len(os.Args) < 2 {
 		fmt.Println("Usage:")
 		fmt.Println("  ./demo-go delete             # test self delete")

@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv) {
     // Must be called first on Windows
-    register_hooks();
+    init();
     if (argc < 2) {
         printf("Usage: %s <delete|replace> [path]\n", argv[0]);
         printf("  delete: Delete the current executable\n");

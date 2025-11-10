@@ -4,10 +4,10 @@ const SELFDELETE_SUFFIX: []const u8 = ".__selfdelete__.exe";
 const TEMP_SUFFIX: []const u8 = ".__temp__.exe";
 const RELOCATED_SUFFIX: []const u8 = ".__relocated__.exe";
 
-// Track whether hooks have been registered via registerHooks() -> selfDeleteInit()
+// Track whether hooks have been registered via init() -> selfDeleteInit()
 var hooks_registered: bool = false;
 
-/// Must be called at the start of main() on Windows via `registerHooks()`
+/// Must be called at the start of main() on Windows via `init()`
 /// Checks if this process is a self-delete helper and handles cleanup if so.
 pub fn selfDeleteInit(allocator: ?std.mem.Allocator) void {
     hooks_registered = true;
