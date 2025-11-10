@@ -49,7 +49,7 @@ pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void
     const temp_exe = try getTmpExePath(allocator, current_exe, parent_dir, TEMP_SUFFIX);
     defer allocator.free(temp_exe);
     try std.fs.copyFileAbsolute(new_exe_path_abs, temp_exe, .{});
-    errdefer std.fs.deleteFileAbsolute(temp_exe);
+    errdefer std.fs.deleteFileAbsolute(temp_exe) catch {};
     try std.fs.renameAbsolute(temp_exe, current_exe);
     return;
 }
@@ -144,7 +144,7 @@ fn schedule_self_deletion_on_shutdown(allocator: std.mem.Allocator, current_exe:
     }
 
     // Strategy 3: Use exe's own directory (fallback, always same drive)
-    const exe_base_dir = std.fs.path.dirname(current_exe) orelse error.UnexpectedNoParentDir;
+    const exe_base_dir = std.fs.path.dirname(current_exe) orelse return error.UnexpectedNoParentDir;
 
     const relocated_exe = try getTmpExePath(allocator, current_exe, exe_base_dir, RELOCATED_SUFFIX);
     defer allocator.free(relocated_exe);
