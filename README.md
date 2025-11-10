@@ -38,6 +38,8 @@ try re.selfReplace(allocator, "path/to/new/executable");
 // Warning: Deletes current executable
 try re.selfDelete();
 ```
+
+If you're deleting the parent folder itself of the current exe then you might not want to use `selfDelete` directly but instead provide the current parent dir (or really any dir that you want to prevent from keeping temporary exes) using `selfDeleteExcludingPath(path: []const u8)` where the function ensures that no temporary exes are put into that path, thereby preventing its deletion for the lifetime of the current running executable.
 ---
 
 ### Demo
@@ -69,6 +71,7 @@ Try out the `demo-c` exe which calls libreplace-exe from C:
 If you're using it via FFI, the function signatures are defined in [replace_exe.h](include/replace_exe.h) and can be used in your code as the following:
 - `selfReplace` becomes `self_replace(const char* path)`
 - `selfDelete` becomes `self_delete()`
+- `selfDeleteExcludingPath` becomes `self_delete_excluding_path(const char* path)`
 - `init(?std.mem.Allocator)` becomes `init()`
 
 See [c_api.zig](c_api.zig) for definitions. 
