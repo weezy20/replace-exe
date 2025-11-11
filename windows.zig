@@ -26,6 +26,7 @@ pub fn selfDeleteInit(allocator: ?std.mem.Allocator) void {
 }
 
 pub fn selfReplace(allocator: std.mem.Allocator, new_exe_path: []const u8) !void {
+    if (!hooks_registered) return error.HooksNotRegistered;
     // Abs path to new exe
     const new_exe_path_abs = try std.fs.realpathAlloc(allocator, new_exe_path);
     defer allocator.free(new_exe_path_abs);
