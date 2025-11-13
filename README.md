@@ -44,6 +44,12 @@ Note: On windows, if you're deleting the parent folder itself of the current exe
 
 The current strategy is to place temporary exes in `%TMP%` or `%TEMP%` & if that fails due to cross filesystem paths (exe & temp dir being on different filesystems) we fallback to storing the temp exe helpers in current parent of running exe unless `selfDeleteExcludingPath(p)` is provided in which case, the parent of `p` would be selected & as a fallback, we would go back to using the same parent dir of current-exe.
 
+> Recommended guidelines:
+
+> - Call these functions at most once each per program execution
+> - If using both, always do selfReplace before selfDelete
+> - Ideally, make them mutually exclusive in your application logic
+
 ---
 
 ### Demo
