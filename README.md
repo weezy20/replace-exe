@@ -51,7 +51,8 @@ The current strategy is to place temporary exes in `%TMP%` or `%TEMP%` & if that
 > Recommended guidelines:
 
 > - Call these functions at most once each per program execution
-> - If using both, always do selfReplace before selfDelete
+> - (UNSAFE windows) If using both, prefer do selfReplace before selfDelete - This will still not cleanup the helpers properly as the original file would've been moved & will spawn the new/exe/ which my not have
+> the call to `init()` thereby preventing self-cleanup. It's best to avoid this.
 > - Ideally, make them mutually exclusive in your application logic
 
 ---
