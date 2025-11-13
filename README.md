@@ -30,6 +30,10 @@ exe.root_module.addImport("replace_exe", libreplace_exe.module("replace_exe"));
 const re = @import("replace_exe");
 // step 2: register hook as soon as possible in main(). This is a no-op on non-windows OS:
 pub fn main() !void {
+    const allocator = std.heap.page_allocator;
+    // CRITICAL (windows): Call init() BEFORE any application logic.
+    // On Windows, this detects if the process is a cleanup helper and exits immediately.
+    // Any code before this line will run in helper processes too if spawned using selfDelete or selfReplace in windows!
     re.init(allocator); // or re.init(null) if you want to go with the default ArenaAllocator(std.heap.page_allocator) for `selfDeleteInit()` operations
     // your logic here..
 }
